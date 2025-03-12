@@ -1,0 +1,126 @@
+networks:
+  microservices-net:
+
+services:
+  order-postgres:
+    image: postgres:15
+    container_name: order_postgres_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pwd1
+      POSTGRES_DB: orderdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - order_pgdata:/var/lib/postgresql/data
+    networks:
+      - microservices-net
+
+  order-service:
+    container_name: order-service
+    build:
+      context: ./order
+      dockerfile: Dockerfile
+    depends_on:
+      - order-postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://order-postgres:5432/orderdb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: pwd1
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8080:8081"
+    networks:
+      - microservices-net
+
+  inventory-postgres:
+    image: postgres:15
+    container_name: inventory_postgres_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pwd2
+      POSTGRES_DB: inventorydb
+    ports:
+      - "5434:5432"
+    volumes:
+      - inventory_pgdata:/var/lib/postgresql/data
+    networks:
+      - microservices-net
+
+  inventory-service:
+    container_name: inventory-service
+    build:
+      context: ./inventory
+      dockerfile: Dockerfile
+    depends_on:
+      - inventory-postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://inventory-postgres:5432/inventorydb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: pwd2
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8180:8080"
+    networks:
+      - microservices-net
+
+  payment-postgres:
+    image: postgres:15
+    container_name: payment_postgres_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pwd3
+      POSTGRES_DB: paymentdb
+    ports:
+      - "5435:5432"
+    volumes:
+      - payment_pgdata:/var/lib/postgresql/data
+    networks:
+      - microservices-net
+
+  payment-service:
+    container_name: payment-service
+    build:
+      context: ./payment
+      dockerfile: Dockerfile
+    depends_on:
+      - payment-postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://payment-postgres:5432/paymentdb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: pwd3
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8280:8082"
+    networks:
+      - microservices-net
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - microservices-net
+
+  product-service:
+    container_name: product-service
+    build:
+      context: ./product
+      dockerfile: Dockerfile
+    depends_on:
+      - mongo
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/productdb
+    ports:
+      - "8380:8083"
+    networks:
+      - microservices-net
+
+volumes:
+  order_pgdata:
+  inventory_pgdata:
+  payment_pgdata:
+  mongo_data:
