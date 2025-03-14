@@ -1,7 +1,40 @@
-networks:
-  microservices-net:
+version: '3.8'
 
 services:
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-net
+
+  eureka-client:
+    build:
+      context: ./eureka-client
+      dockerfile: Dockerfile
+    ports:
+      - "8090"
+    environment:
+      EUREKA_SERVER_URL: "http://eureka-server:8761/eureka/"
+    networks:
+      - microservices-net
+    deploy:
+      replicas: 3
+    depends_on:
+      - eureka-server
+
+  service-discovery:
+    build:
+      context: ./service-discovery
+      dockerfile: Dockerfile
+    ports:
+      - "8091:8091"
+    networks:
+      - microservices-net
+
   order-postgres:
     image: postgres:15
     container_name: order_postgres_db
@@ -17,17 +50,20 @@ services:
       - microservices-net
 
   order-service:
-    container_name: order-service
     build:
       context: ./order
       dockerfile: Dockerfile
     depends_on:
       - order-postgres
+      - eureka-server
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://order-postgres:5432/orderdb
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: pwd1
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_SERVER_URL: "http://eureka-server:8761/eureka/"
+    deploy:
+      replicas: 3
     ports:
       - "8080:8081"
     networks:
@@ -48,17 +84,20 @@ services:
       - microservices-net
 
   inventory-service:
-    container_name: inventory-service
     build:
       context: ./inventory
       dockerfile: Dockerfile
     depends_on:
       - inventory-postgres
+      - eureka-server
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://inventory-postgres:5432/inventorydb
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: pwd2
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_SERVER_URL: "http://eureka-server:8761/eureka/"
+    deploy:
+      replicas: 3
     ports:
       - "8180:8080"
     networks:
@@ -79,17 +118,20 @@ services:
       - microservices-net
 
   payment-service:
-    container_name: payment-service
     build:
       context: ./payment
       dockerfile: Dockerfile
     depends_on:
       - payment-postgres
+      - eureka-server
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://payment-postgres:5432/paymentdb
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: pwd3
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_SERVER_URL: "http://eureka-server:8761/eureka/"
+    deploy:
+      replicas: 3
     ports:
       - "8280:8082"
     networks:
@@ -106,18 +148,25 @@ services:
       - microservices-net
 
   product-service:
-    container_name: product-service
     build:
       context: ./product
       dockerfile: Dockerfile
     depends_on:
       - mongo
+      - eureka-server
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/productdb
+      EUREKA_SERVER_URL: "http://eureka-server:8761/eureka/"
+    deploy:
+      replicas: 3
     ports:
       - "8380:8083"
     networks:
       - microservices-net
+
+networks:
+  microservices-net:
+    driver: bridge
 
 volumes:
   order_pgdata:
