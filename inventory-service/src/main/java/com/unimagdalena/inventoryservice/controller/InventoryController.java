@@ -1,5 +1,6 @@
 package com.unimagdalena.inventoryservice.controller;
 
+
 import com.unimagdalena.inventoryservice.entity.Inventory;
 import com.unimagdalena.inventoryservice.service.InventoryService;
 import lombok.RequiredArgsConstructor;
