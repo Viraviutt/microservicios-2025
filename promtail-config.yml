@@ -1,0 +1,58 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+positions:
+  filename: /tmp/positions.yaml
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+scrape_configs:
+  - job_name: docker-order-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker
+          env: prod
+          app: order-service
+          host: "{{ .Env.HOSTNAME }}"
+          __path__: /var/lib/docker/containers/*/*.log
+  - job_name: docker-product-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker
+          env: prod
+          app: product-service
+          host: "{{ .Env.HOSTNAME }}"
+          __path__: /var/lib/docker/containers/*/*.log
+  - job_name: docker-inventory-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker
+          env: prod
+          app: inventory-service
+          host: "{{ .Env.HOSTNAME }}"
+          __path__: /var/lib/docker/containers/*/*.log
+  - job_name: docker-payment-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker
+          env: prod
+          app: payment-service
+          host: "{{ .Env.HOSTNAME }}"
+          __path__: /var/lib/docker/containers/*/*.log
+  - job_name: docker-api-gateway
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker
+          env: prod
+          app: api-gateway
+          host: "{{ .Env.HOSTNAME }}"
+          __path__: /var/lib/docker/containers/*/*.log
