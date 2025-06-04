@@ -2,7 +2,7 @@
 
 Proyecto desarrollado para la clase de microservicios en el periodo 2025-I.
 
-Este trabajoj implementa una arquitectura de microservicios moderna utilizando Java y Spring Boot, con integración de herramientas de monitoreo, autenticación y despliegue orquestado.
+Este trabajo implementa una arquitectura de microservicios moderna utilizando Java y Spring Boot, con integración de herramientas de monitoreo, autenticación y despliegue orquestado.
 
 ## Características principales
 - Microservicios independientes para inventario, pedidos, pagos y productos
