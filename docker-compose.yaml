@@ -36,7 +36,7 @@ services:
   product-service:
     build: ./product-service
     ports:
-      - "8081"
+      - "8081:8081"
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://product-db:27017/productdb
       - SERVER_PORT=8081
