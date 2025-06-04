@@ -1,0 +1,161 @@
+services:
+  # ORDER MICROSERVICE
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    ports:
+      - "8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://order-db:5432/orderdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SERVER_PORT=8080
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - order-db
+    networks:
+      - microservices-network
+    deploy:
+      replicas: 1
+
+  order-db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=orderdb
+    volumes:
+      - order-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+
+  # PRODUCT MICROSERVICE
+  product-service:
+    build: ./product-service
+    ports:
+      - "8081" #Debe exponerse tanto internamente como para el cliente en otro puerto supone que es porque utiliza una base de datos no relacional
+    environment:    #Pero no sabe si esa es la razon  ya que de esta forma fue que funciono
+      - SPRING_DATA_MONGODB_URI=mongodb://product-db:27017/productdb
+      - SERVER_PORT=8081
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - product-db
+    networks:
+      - microservices-network
+    deploy:
+      replicas: 1
+
+  product-db:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - product-data:/data/db
+    networks:
+      - microservices-network
+  # INVENTORY MICROSERVICE
+  inventory-service:
+    build: ./inventory-service
+    ports:
+      - "8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://inventory-db:5432/inventorydb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SERVER_PORT=8082
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - inventory-db
+    networks:
+      - microservices-network
+    deploy:
+      replicas: 1
+
+  inventory-db:
+    image: postgres:15-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=inventorydb
+    volumes:
+      - inventory-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+
+  # PAYMENT MICROSERVICE
+  payment-service:
+    build: ./payment-service
+    ports:
+      - "8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://payment-db:5432/paymentdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SERVER_PORT=8083
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - payment-db
+    networks:
+      - microservices-network
+    deploy:
+      replicas: 1
+
+  payment-db:
+    image: postgres:15-alpine
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=paymentdb
+    volumes:
+      - payment-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+  # EUREKA SERVER
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-network
+
+  # API GATEWAY
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8092-8093:8090"
+    environment:
+      - SERVER_PORT=8090
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - order-service
+      - product-service
+      - inventory-service
+      - payment-service
+    networks:
+      - microservices-network
+    deploy:
+      replicas: 1
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  order-data:
+  product-data:
+  inventory-data:
+  payment-data:
+
