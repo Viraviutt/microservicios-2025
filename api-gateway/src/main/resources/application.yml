@@ -20,6 +20,20 @@ spring:
         max-connections: 1000
         acquire-timeout: 5000
         max-idle-time: 15s
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8090/realms/microservicios-2025
+        registration:
+          keycloak:
+            provider: keycloak
+            scope: openid
+            client-id: microservicios-2025_client
+            client-secret: 4dPbkRMouSO8MX8fqSQMPkIzUm7TPayy
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
 
 eureka:
   client:
