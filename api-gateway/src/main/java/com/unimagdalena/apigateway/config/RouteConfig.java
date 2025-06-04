@@ -36,8 +36,8 @@ public class RouteConfig {
                         .uri("lb://payment-service"))
               .route("keycloak-token", r -> r
                 .path("/auth")
-                .filters(f -> f.setPath("/realms/master/protocol/openid-connect/token"))
-                .uri("http://keycloak:8080"))
+                .filters(f -> f.setPath("/realms/microservicios-2025/protocol/openid-connect/token"))
+                .uri("http://keycloak:8084"))
                 .build();
 
     }

@@ -25,13 +25,13 @@ spring:
       client:
         provider:
           keycloak:
-            issuer-uri: http://localhost:8090/realms/microservicios-2025
+            issuer-uri: http://localhost:8084/realms/microservicios-2025
         registration:
           keycloak:
             provider: keycloak
             scope: openid
             client-id: microservicios-2025_client
-            client-secret: 4dPbkRMouSO8MX8fqSQMPkIzUm7TPayy
+            client-secret: VpEjSs1Ouvo3e9VcHEN0W9cBNzsBQIL3
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
 
